@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR1 2026 — Análise por Questão e Faixa</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root { --bg:#fafafa; --card:#fff; --text:#1a1a2e; --accent:#4361ee; --gray:#6c757d; --border:#e0e0e0; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+.header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); color:#fff; padding:2rem; text-align:center; }
+.header h1 { font-size:1.7rem; font-weight:700; margin-bottom:0.25rem; }
+.header p { opacity:0.8; font-size:0.9rem; }
+.container { max-width:1260px; margin:0 auto; padding:1.5rem; }
+.section { margin-bottom:2.5rem; }
+.section-title { font-size:1.25rem; font-weight:700; margin-bottom:1rem; padding-bottom:0.4rem; border-bottom:2px solid var(--accent); display:inline-block; }
+.chart-card { background:var(--card); border-radius:12px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,.06); margin-bottom:1.5rem; }
+.chart-card h3 { font-size:0.95rem; margin-bottom:0.8rem; color:var(--text); }
+.chart-pair { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+.insight { background:#fffbeb; border-left:4px solid #fb8500; padding:1rem 1.2rem; border-radius:0 8px 8px 0; margin:1rem 0; font-size:0.88rem; line-height:1.6; }
+.insight strong { color:#d35400; }
+.tab-bar { display:flex; gap:0.5rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+.tab-btn { padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:20px; background:var(--card); cursor:pointer; font-size:0.82rem; transition:all .2s; }
+.tab-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.tab-btn:hover { border-color:var(--accent); }
+.legend-bar { display:flex; gap:1.2rem; flex-wrap:wrap; margin-bottom:0.8rem; font-size:0.78rem; align-items:center; }
+.legend-item { display:flex; align-items:center; gap:4px; }
+.legend-swatch { width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,.1); }
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:0.8rem; margin-bottom:2rem; }
+.summary-card { background:var(--card); border-radius:10px; padding:1rem; box-shadow:0 1px 5px rgba(0,0,0,.05); text-align:center; border-top:3px solid var(--accent); }
+.summary-card .val { font-size:1.8rem; font-weight:700; color:var(--accent); }
+.summary-card .lbl { font-size:0.72rem; color:var(--gray); text-transform:uppercase; letter-spacing:.4px; }
+table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+th,td { padding:0.5rem 0.7rem; text-align:center; border-bottom:1px solid var(--border); }
+th { background:#f0f4ff; font-weight:600; position:sticky; top:0; }
+.badge { display:inline-block; padding:1px 7px; border-radius:8px; font-size:0.72rem; font-weight:600; }
+.b-red { background:#fde8ec; color:#d32f2f; }
+.b-grn { background:#e8faf3; color:#2e7d32; }
+.b-org { background:#fff3e0; color:#e65100; }
+.chart-wrap { position:relative; }
+.disc-label { font-size:0.78rem; color:var(--gray); margin-bottom:0.3rem; }
+.grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:1.2rem; }
+@media(max-width:700px) { .chart-pair,.grid3 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PR1 2026 — Análise por Questão e Faixa de Rubrica</h1>
+  <p>Estudos Literários & Língua e Produção · 1496 registros · 13.845 carimbos de atribuição</p>
+</div>
+
+<div class="container">
+
+<div class="summary-grid">
+  <div class="summary-card"><div class="val">5.28</div><div class="lbl">Média Geral</div></div>
+  <div class="summary-card"><div class="val">22.5%</div><div class="lbl">Abaixo de 4</div></div>
+  <div class="summary-card"><div class="val">17.6%</div><div class="lbl">Acima de 7</div></div>
+  <div class="summary-card" style="border-top-color:#d32f2f"><div class="val">2º ano</div><div class="lbl">Série mais fraca (4.95)</div></div>
+  <div class="summary-card" style="border-top-color:#2e7d32"><div class="val">3º ano</div><div class="lbl">Série mais forte (5.61)</div></div>
+</div>
+
+<!-- ====== 1. FAIXA DE NOTA ====== -->
+<div class="section">
+  <div class="section-title">1. Distribuição por faixa de nota — visão geral</div>
+  <div class="chart-pair">
+    <div class="chart-card"><h3>Estudos Literários</h3><div class="chart-wrap" style="height:220px"><canvas id="faixaEL"></canvas></div></div>
+    <div class="chart-card"><h3>Língua e Produção</h3><div class="chart-wrap" style="height:220px"><canvas id="faixaLP"></canvas></div></div>
+  </div>
+  <div class="insight">
+    <strong>Estudos Literários</strong> tem média inferior a Língua e Produção em todas as séries. O 1º ano em E.Lit é o pior cenário: 30.5% abaixo de 4 e apenas 7.4% acima de 7. O 3º ano é o único com proporção relevante de notas altas (20.9%). Em L.Prod, o 2º ano é o vale — cai de 35.9% ≥7 (1º) para 13.0% (2º), e o 3º concentra 58% na faixa 5–6.9.
+  </div>
+</div>
+
+<!-- ====== 2. POR QUESTÃO ====== -->
+<div class="section">
+  <div class="section-title">2. Faixas de rubrica por questão</div>
+  <div class="tab-bar" id="serieTabs">
+    <button class="tab-btn active" onclick="showSerie(1)">1º Ano</button>
+    <button class="tab-btn" onclick="showSerie(2)">2º Ano</button>
+    <button class="tab-btn" onclick="showSerie(3)">3º Ano</button>
+  </div>
+  <div id="legendArea" class="legend-bar"></div>
+  <div class="chart-pair">
+    <div class="chart-card"><h3 id="qTitleEL">Estudos Literários — 1º Ano</h3><div class="chart-wrap" id="wrapEL" style="height:340px"><canvas id="qChartEL"></canvas></div></div>
+    <div class="chart-card"><h3 id="qTitleLP">Língua e Produção — 1º Ano</h3><div class="chart-wrap" id="wrapLP" style="height:340px"><canvas id="qChartLP"></canvas></div></div>
+  </div>
+  <div id="insightQ" class="insight"></div>
+</div>
+
+<!-- ====== 3. A-D vs E-H (SOMENTE E.LIT) ====== -->
+<div class="section">
+  <div class="section-title">3. 1º Ano — Estudos Literários: Turmas A-D vs E-H</div>
+
+  <!-- 3a: % por agrupamento de faixas, por questão -->
+  <div class="chart-pair">
+    <div class="chart-card">
+      <h3>Turmas A-D — % por agrupamento de faixas</h3>
+      <div class="chart-wrap" id="wrapOvAD" style="height:340px"><canvas id="ovAD"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Turmas E-H — % por agrupamento de faixas</h3>
+      <div class="chart-wrap" id="wrapOvEH" style="height:340px"><canvas id="ovEH"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Visão geral:</strong> E-H supera A-D na maioria das questões. A maior discrepância está na <strong>Q3</strong>: E-H tem 39% nas faixas A-B contra 15% de A-D, e apenas 6% nas faixas E-G contra 13%. <strong>Q4b</strong> também mostra vantagem — E-H com 17% em A-B contra 10%, e menos alunos nas faixas baixas (8% vs 15%). Q5a e Q5b são as melhores em ambos os blocos, mas E-H tem mais concentração nas faixas A-B em Q5b (69% vs 56%).
+  </div>
+
+  <!-- 3b: Detalhamento vertical por faixa — só questões com discrepância -->
+  <h3 style="margin:1.5rem 0 0.8rem; font-size:1rem;">Detalhamento por faixa — questões com maior discrepância</h3>
+  <p style="font-size:0.82rem; color:var(--gray); margin-bottom:1rem;">Cada grupo de faixa (A, B, C…) mostra lado a lado a % de A-D e E-H. Permite ver exatamente onde a distribuição diverge.</p>
+
+  <div class="grid3">
+    <div class="chart-card">
+      <div class="disc-label">Q3 — maior gap (+14%)</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="vQ3"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="disc-label">Q5a — gap na faixa A (+7pp)</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="vQ5a"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="disc-label">Q4b — gap nas faixas E-F</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="vQ4b"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Q3:</strong> A diferença real está na faixa A — E-H tem 34% contra apenas 13% de A-D. A-D compensa acumulando na faixa C (66% vs 53%) e tem mais alunos na faixa F (9% vs 3%). <strong>Q5a:</strong> E-H concentra mais na faixa A (47% vs 40%), enquanto A-D distribui mais na faixa B (53% vs 42%). <strong>Q4b:</strong> Ambos concentram ~72% na faixa C, mas A-D tem 13% na faixa E contra apenas 4% em E-H — a vantagem de E-H vem de menos alunos nas faixas baixas.
+  </div>
+</div>
+
+<!-- ====== 4. TABELA CRÍTICA ====== -->
+<div class="section">
+  <div class="section-title">4. Questões críticas</div>
+  <div class="chart-card" style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Série</th><th>Disciplina</th><th>Questão</th><th>% Faixas Altas</th><th>% Faixas Baixas</th><th>Status</th></tr></thead>
+      <tbody id="critTable"></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+const RUBRIC_AG={'A':'#6aaa64','B':'#8cc084','C':'#b8d8b8','D':'#f5deb3','E':'#f0c4c4','F':'#e8a0a0','G':'#d47070','X':'#999','H':'#c04040'};
+const RUBRIC_R={'RC':'#6aaa64','RPP':'#8cc084','RPP2':'#a0cc98','RP':'#f5deb3','RPS':'#f0c4c4','RPS2':'#e8c4a0','REB':'#ddd','RIB':'#e8a0a0','RIC':'#d47070','RIE':'#c04040','RI':'#e8a0a0'};
+function gc(f){return f.startsWith('R')?(RUBRIC_R[f]||'#ccc'):(RUBRIC_AG[f]||'#ccc');}
+
+const DATA={
+"1_Estudos Literários":{questions:["Q1a","Q1b","Q2","Q3","Q4a","Q4b","Q5a","Q5b"],faixas:["A","B","C","D","E","F","G"],rubrica_pct:[[5.0,4.0,8.3,6.7,38.3,25.0,12.7],[2.1,10.7,8.2,25.8,29.2,10.7,13.4],[1.4,1.7,17.6,14.5,15.9,5.4,43.6],[23.7,3.0,59.5,4.3,3.3,6.2,0.0],[9.5,1.7,50.2,5.1,26.8,6.8,0.0],[6.7,6.7,72.6,2.3,8.0,3.7,0.0],[44.0,47.4,8.6,0.0,0.0,0.0,0.0],[32.8,29.4,37.7,0.0,0.0,0.0,0.0]]},
+"1_Língua e Produção":{questions:["Q1a","Q1b","Q2a","Q2b","Q3a","Q3b","Q4a","Q4b","Q5"],faixas:["A","B","C","D","E","F","G","H"],rubrica_pct:[[50.0,3.0,47.0,0.0,0.0,0.0,0.0,0.0],[69.4,26.4,4.2,0.0,0.0,0.0,0.0,0.0],[17.5,25.6,20.5,11.4,11.4,0.6,8.4,4.5],[24.8,18.0,15.3,20.7,1.7,19.4,0.0,0.0],[44.3,29.2,26.5,0.0,0.0,0.0,0.0,0.0],[53.1,4.0,14.5,6.6,3.6,18.2,0.0,0.0],[30.9,3.6,10.1,31.3,18.2,5.9,0.0,0.0],[24.1,21.7,6.1,23.4,13.6,2.0,9.2,0.0],[27.6,6.6,15.6,8.0,13.3,4.7,6.3,17.9]]},
+"2_Estudos Literários":{questions:["Q1a I","Q1a II","Q1b I","Q2","Q4a I","Q4a II","Q4b I","Q5 I","Q5 II"],faixas:["A","B","C","D","E","F","X"],rubrica_pct:[[16.3,12.5,32.9,0.0,0.0,0.0,38.3],[21.2,35.5,37.3,0.0,0.0,0.0,5.9],[9.1,24.2,42.0,0.0,0.0,0.0,24.7],[4.0,13.6,23.1,26.4,18.7,14.2,0.0],[64.2,31.7,0.0,0.0,0.0,0.0,4.1],[72.0,25.6,0.0,0.0,0.0,0.0,2.3],[5.3,17.3,38.1,35.8,0.0,0.0,3.5],[9.8,19.1,41.1,28.4,0.0,0.0,1.5],[7.2,9.4,26.9,47.5,7.5,0.0,1.5]]},
+"2_Língua e Produção":{questions:["Ident. argum.","Segmentação","Or. red. ger.","Verbal/não-v.","Comp. textos","Anál. conceitual","Pronome (ref.)","Amb. pron. poss.","Efeito pron. ind.","Anál. contexto","Mec. evitar rep."],faixas:["A","B","C","D","E","F","G"],rubrica_pct:[[74.7,6.3,4.5,3.9,7.3,3.4,0.0],[77.3,16.0,5.7,1.0,0.0,0.0,0.0],[55.5,30.0,14.6,0.0,0.0,0.0,0.0],[46.7,10.2,6.9,7.5,10.5,13.7,5.1],[18.9,22.1,28.4,13.7,16.9,0.0,0.0],[0.5,16.7,26.7,39.4,16.7,0.0,0.0],[10.2,5.1,36.3,28.3,16.4,3.5,0.0],[0.0,0.0,0.0,0.0,37.3,12.5,50.2],[18.8,18.8,10.4,7.9,20.4,17.3,6.8],[9.5,17.2,10.5,3.3,3.3,39.8,17.2],[39.5,9.7,4.8,0.0,6.5,33.1,6.5]]},
+"3_Estudos Literários":{questions:["Q1","Q2","Q3","Q4","Q5a","Q5b","Q6"],faixas:["RC","RPP","RPP2","RP","RPS","RPS2","RIB","RIC","RIE"],rubrica_pct:[[14.1,25.6,0.0,13.7,15.9,0.0,30.8,0.0,0.0],[22.8,33.3,0.0,27.6,14.5,0.0,1.8,0.0,0.0],[25.7,14.6,0.0,21.2,13.7,0.0,24.8,0.0,0.0],[59.5,12.5,15.5,4.7,1.3,2.6,0.0,0.0,3.9],[34.7,23.3,0.0,19.2,13.7,0.0,9.1,0.0,0.0],[32.6,20.9,0.0,30.0,7.0,0.0,0.0,9.6,0.0],[8.0,18.1,0.0,14.2,20.4,0.0,39.4,0.0,0.0]]},
+"3_Língua e Produção":{questions:["Q1a","Q1b","Q2a","Q2b","Q3a","Q3b","Q4a","Q4b","Q5a","Q5b","Q6"],faixas:["RC","RPP","RP","RI"],rubrica_pct:[[78.6,0.0,21.4,0.0],[18.3,46.9,17.8,16.9],[7.8,52.2,33.6,6.5],[2.0,15.8,53.2,29.1],[12.6,18.0,26.1,43.2],[75.4,0.0,18.9,5.7],[63.7,23.3,9.9,3.1],[60.2,0.0,39.8,0.0],[27.1,34.3,27.6,11.0],[71.4,0.0,28.6,0.0],[3.7,22.3,48.8,25.1]]}
+};
+
+// Section 3 data: % in faixa groups per question (E.Lit only)
+const OV_QUESTIONS=["Q1a","Q1b","Q2","Q3","Q4a","Q4b","Q5a","Q5b"];
+const OV_AD={
+  ab:[8.6,17.1,1.4,14.6,10.1,9.8,93.9,56.3],
+  cd:[13.2,30.7,33.1,72.2,54.1,74.8,6.1,43.7],
+  eg:[78.1,52.1,65.5,13.2,35.8,15.4,0.0,0.0]
+};
+const OV_EH={
+  ab:[9.4,8.6,4.6,38.6,12.2,16.7,89.0,68.5],
+  cd:[16.8,37.1,31.1,55.6,56.5,75.0,11.0,31.5],
+  eg:[73.8,54.3,64.2,5.9,31.3,8.3,0.0,0.0]
+};
+
+// Section 3 detail: per-faixa vertical grouped bars (only faixas with data)
+const VDATA={
+  Q3:{ faixas:["A","B","C","D","E","F"], AD:[13.2,1.3,66.2,6.0,4.0,9.3], EH:[34.0,4.6,52.9,2.6,2.6,3.3] },
+  Q5a:{ faixas:["A","B","C"], AD:[40.5,53.4,6.1], EH:[47.4,41.6,11.0] },
+  Q4b:{ faixas:["A","B","C","D","E","F"], AD:[4.9,4.9,72.7,2.1,12.6,2.8], EH:[8.3,8.3,72.4,2.6,3.8,4.5] }
+};
+
+const CRITICAL=[
+  {s:'1º',d:'Est. Literários',q:'Q1a',top:'9%',bot:'76%',st:'crit'},
+  {s:'1º',d:'Est. Literários',q:'Q2',top:'3%',bot:'65%',st:'crit'},
+  {s:'1º',d:'Est. Literários',q:'Q1b',top:'13%',bot:'53%',st:'crit'},
+  {s:'1º',d:'Est. Literários',q:'Q4a',top:'11%',bot:'34%',st:'warn'},
+  {s:'1º',d:'L. e Produção',q:'Q5 (prod.)',top:'34%',bot:'42%',st:'crit'},
+  {s:'1º',d:'L. e Produção',q:'Q4a',top:'35%',bot:'24%',st:'warn'},
+  {s:'2º',d:'Est. Literários',q:'Q2',top:'18%',bot:'33%',st:'warn'},
+  {s:'2º',d:'Est. Literários',q:'Q5 II',top:'17%',bot:'49%',st:'crit'},
+  {s:'2º',d:'L. e Produção',q:'Amb. pron. poss.',top:'0%',bot:'100%',st:'crit'},
+  {s:'2º',d:'L. e Produção',q:'Anál. contexto',top:'10%',bot:'60%',st:'crit'},
+  {s:'2º',d:'L. e Produção',q:'Efeito pron. ind.',top:'19%',bot:'45%',st:'crit'},
+  {s:'3º',d:'Est. Literários',q:'Q6',top:'8%',bot:'39%',st:'crit'},
+  {s:'3º',d:'Est. Literários',q:'Q1',top:'14%',bot:'31%',st:'warn'},
+  {s:'3º',d:'L. e Produção',q:'Q3a',top:'13%',bot:'43%',st:'crit'},
+  {s:'3º',d:'L. e Produção',q:'Q2b',top:'2%',bot:'29%',st:'warn'},
+  {s:'3º',d:'L. e Produção',q:'Q6',top:'4%',bot:'25%',st:'warn'},
+];
+
+const INSIGHTS={
+  1:`<strong>1º ano — E.Lit:</strong> Q1a (76% nas faixas E-G) e Q2 (65% E-G, com 44% concentrados na faixa G) são as questões mais difíceis da prova inteira. Q2 revela incompreensão generalizada do que era solicitado. Em contraste, Q5a e Q5b vão bem (faixas A-B dominam) e Q4b tem 73% na faixa C — desempenho parcial uniforme. <strong>L.Prod:</strong> Questões de localização (Q1a, Q1b, Q3a) têm bom desempenho. A Q5 (produção textual) é a mais dispersa, com alunos espalhados por todas as faixas e 18% na faixa H. Q4a concentra 31% na faixa D.`,
+  2:`<strong>2º ano — E.Lit:</strong> Q4a é o ponto alto (>90% em faixas A-B nas duas partes). Q2 é o problema mais grave: apenas 4% na faixa A, com 33% nas faixas D-F. Q5 II concentra 48% na faixa D. Q1a I tem 38% na faixa X (resposta fora do padrão). <strong>L.Prod:</strong> Segmentação e Identificação de argumentos são as habilidades mais dominadas (>75% faixa A). Ambiguidade de pronome possessivo é crítica (100% faixas E-G). Análise de contexto e Efeito de sentido do pronome indefinido também concentram muitos alunos nas faixas inferiores.`,
+  3:`<strong>3º ano — E.Lit:</strong> Q4 é a melhor questão (60% RC). Q6 é a pior (39% RIB + 20% RPS). Q1 preocupa (31% RIB). <strong>L.Prod:</strong> Itens de localização e identificação (Q1a, Q3b, Q4a, Q4b, Q5b) vão muito bem, com 60-79% em RC. Itens que pedem relação e articulação (Q2b, Q3a, Q6) concentram 25-43% na faixa RI. Q2a tem 52% em RPP — desempenho parcial generalizado.`
+};
+
+// ===== UTILS =====
+let charts={};
+function kill(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function buildLeg(id,faixas){
+  document.getElementById(id).innerHTML=faixas.map(f=>`<span class="legend-item"><span class="legend-swatch" style="background:${gc(f)}"></span>${f}</span>`).join('');
+}
+
+// ===== 1. Faixa de nota =====
+function faixaNota(cid,disc){
+  const d=disc==='EL'
+    ?{l:['1º','2º','3º'],f1:[30.5,25.3,22.7],f2:[21.1,29.3,14.7],f3:[40.9,38.9,41.8],f4:[7.4,6.6,20.9]}
+    :{l:['1º','2º','3º'],f1:[20.9,25.1,7.7],f2:[13.0,22.9,15.0],f3:[30.2,39.0,58.2],f4:[35.9,13.0,19.1]};
+  new Chart(document.getElementById(cid),{
+    type:'bar',data:{labels:d.l,datasets:[
+      {label:'< 4',data:d.f1,backgroundColor:'#e8a0a0',borderWidth:0,barPercentage:.7},
+      {label:'4–4.9',data:d.f2,backgroundColor:'#f0c4c4',borderWidth:0,barPercentage:.7},
+      {label:'5–6.9',data:d.f3,backgroundColor:'#f5deb3',borderWidth:0,barPercentage:.7},
+      {label:'≥ 7',data:d.f4,backgroundColor:'#b8d8b8',borderWidth:0,barPercentage:.7}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#f0f0f0'}}},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},
+        datalabels:{display:c=>c.dataset.data[c.dataIndex]>=8,color:'#333',font:{size:11,weight:'600'},formatter:v=>v.toFixed(1)+'%',anchor:'center',align:'center'}}}
+  });
+}
+faixaNota('faixaEL','EL');
+faixaNota('faixaLP','LP');
+
+// ===== 2. Por questão =====
+function stacked(cid,d){
+  kill(cid);
+  charts[cid]=new Chart(document.getElementById(cid),{
+    type:'bar',data:{labels:d.questions,datasets:d.faixas.map((f,fi)=>({
+      label:f,data:d.questions.map((_,qi)=>d.rubrica_pct[qi][fi]),
+      backgroundColor:gc(f),borderWidth:0,barPercentage:.82,categoryPercentage:.88
+    }))},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      scales:{x:{stacked:true,max:100,ticks:{callback:v=>v+'%'},grid:{display:false}},y:{stacked:true,grid:{display:false}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw.toFixed(1)}%`}},
+        datalabels:{display:c=>c.dataset.data[c.dataIndex]>=10,color:'#333',font:{size:10,weight:'600'},formatter:v=>v.toFixed(0)+'%',anchor:'center',align:'center'}}}
+  });
+}
+function showSerie(s){
+  document.querySelectorAll('#serieTabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',i===s-1));
+  const dEL=DATA[s+'_Estudos Literários'],dLP=DATA[s+'_Língua e Produção'];
+  document.getElementById('qTitleEL').textContent='Estudos Literários — '+s+'º Ano';
+  document.getElementById('qTitleLP').textContent='Língua e Produção — '+s+'º Ano';
+  buildLeg('legendArea',[...new Set([...dEL.faixas,...dLP.faixas])]);
+  document.getElementById('wrapEL').style.height=Math.max(260,dEL.questions.length*40+30)+'px';
+  document.getElementById('wrapLP').style.height=Math.max(260,dLP.questions.length*40+30)+'px';
+  stacked('qChartEL',dEL); stacked('qChartLP',dLP);
+  document.getElementById('insightQ').innerHTML=INSIGHTS[s]||'';
+}
+showSerie(1);
+
+// ===== 3. A-D vs E-H =====
+// 3a: Stacked faixa groups, same style as section 1
+const colAD='#4361ee', colEH='#f72585';
+function makeOverview(cid, ovData){
+  new Chart(document.getElementById(cid),{
+    type:'bar',
+    data:{labels:OV_QUESTIONS, datasets:[
+      {label:'Faixas E-G',data:ovData.eg,backgroundColor:'#e8a0a0',borderWidth:0,barPercentage:.82,categoryPercentage:.88},
+      {label:'Faixas C-D',data:ovData.cd,backgroundColor:'#f5deb3',borderWidth:0,barPercentage:.82,categoryPercentage:.88},
+      {label:'Faixas A-B',data:ovData.ab,backgroundColor:'#b8d8b8',borderWidth:0,barPercentage:.82,categoryPercentage:.88}
+    ]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      scales:{x:{stacked:true,max:100,ticks:{callback:v=>v+'%'},grid:{display:false}},y:{stacked:true,grid:{display:false}}},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw.toFixed(1)}%`}},
+        datalabels:{display:c=>c.dataset.data[c.dataIndex]>=8,color:'#333',font:{size:10,weight:'600'},formatter:v=>v.toFixed(0)+'%',anchor:'center',align:'center'}}}
+  });
+}
+makeOverview('ovAD', OV_AD);
+makeOverview('ovEH', OV_EH);
+
+// 3b: Vertical grouped bars per faixa for discrepancy questions
+function makeVertical(cid, vd){
+  // Only show faixas where at least one block has > 0
+  const show = vd.faixas.filter((_,i) => vd.AD[i]>0 || vd.EH[i]>0);
+  const adVals = show.map(f => vd.AD[vd.faixas.indexOf(f)]);
+  const ehVals = show.map(f => vd.EH[vd.faixas.indexOf(f)]);
+
+  new Chart(document.getElementById(cid),{
+    type:'bar',
+    data:{
+      labels: show,
+      datasets:[
+        {label:'A-D', data:adVals, backgroundColor:colAD+'bb', borderColor:colAD, borderWidth:1, borderRadius:4, barPercentage:.8, categoryPercentage:.75},
+        {label:'E-H', data:ehVals, backgroundColor:colEH+'bb', borderColor:colEH, borderWidth:1, borderRadius:4, barPercentage:.8, categoryPercentage:.75}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        y:{beginAtZero:true, ticks:{callback:v=>v+'%'}, grid:{color:'#f0f0f0'}, title:{display:false}},
+        x:{grid:{display:false}, ticks:{font:{size:12,weight:'600'}}}
+      },
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          display: ctx => ctx.dataset.data[ctx.dataIndex] >= 3,
+          color:'#333', font:{size:10,weight:'600'},
+          formatter:v=>v.toFixed(0)+'%', anchor:'end', align:'top', offset:1
+        }
+      }
+    }
+  });
+}
+makeVertical('vQ3', VDATA.Q3);
+makeVertical('vQ5a', VDATA.Q5a);
+makeVertical('vQ4b', VDATA.Q4b);
+
+// ===== 4. Tabela =====
+const tb=document.getElementById('critTable');
+CRITICAL.forEach(r=>{
+  const b=r.st==='crit'?'<span class="badge b-red">Crítica</span>':'<span class="badge b-org">Atenção</span>';
+  tb.innerHTML+=`<tr><td>${r.s}</td><td>${r.d}</td><td><strong>${r.q}</strong></td><td>${r.top}</td><td>${r.bot}</td><td>${b}</td></tr>`;
+});
+</script>
+</body>
+</html>
