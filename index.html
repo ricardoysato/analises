@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análises 2026 · Escola Móbile</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --white: #ffffff;
+      --navy: #1e3a5f;
+      --navy-light: #e8edf4;
+      --green: #3db84a;
+      --green-light: #edf7ee;
+      --text: #1e3a5f;
+      --muted: #7a8fa8;
+      --border: #e2e8f0;
+      --shadow: 0 2px 12px rgba(30,58,95,0.07);
+      --shadow-hover: 0 8px 28px rgba(30,58,95,0.13);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+    .topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      display: flex;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .logo-escola {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .logo-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: 0.02em;
+    }
+
+    .topbar-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      margin: 0 8px;
+    }
+
+    .topbar-section {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* Main content */
+    .wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 60px 32px 100px;
+    }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .year-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .year-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+
+    .page-subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* Section */
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      display: block;
+      text-decoration: none;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      transition: all 0.2s ease;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.08s; }
+    .card:nth-child(2) { animation-delay: 0.16s; }
+    .card:nth-child(3) { animation-delay: 0.24s; }
+
+    .card:hover {
+      border-color: var(--green);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .card-inner {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .card-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--navy-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: background 0.2s ease;
+    }
+
+    .card:hover .card-icon {
+      background: var(--green-light);
+    }
+
+    .card-body {
+      flex: 1;
+    }
+
+    .card-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card-arrow {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .card:hover .card-arrow {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-light);
+      transform: translateX(3px);
+    }
+
+    /* Footer */
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .footer-logo {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      opacity: 0.4;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 560px) {
+      .topbar { padding: 0 20px; }
+      .wrapper { padding: 40px 20px 80px; }
+      .card-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <svg class="logo-mark" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="36" rx="6" fill="#1e3a5f"/>
+      <path d="M8 10 L8 26 L20 26 L20 22 L12 22 L12 10 Z" fill="white"/>
+      <path d="M16 10 L28 10 L28 20 L22 20 L22 14 L16 14 Z" fill="#3db84a"/>
+    </svg>
+    <div class="logo-text">
+      <span class="logo-escola">Escola</span>
+      <span class="logo-name">MÓBILE</span>
+    </div>
+    <div class="topbar-divider"></div>
+    <span class="topbar-section">Análises</span>
+  </div>
+
+  <div class="wrapper">
+
+    <div class="page-header">
+      <div class="year-badge">2026</div>
+      <h1>Dashboards</h1>
+      <p class="page-subtitle">Relatórios interativos de desempenho escolar</p>
+    </div>
+
+    <div class="section-label">PR1 · Primeiro Período</div>
+
+    <div class="cards">
+
+      <a class="card" href="2026_pr1.html">
+        <div class="card-inner">
+          <div class="card-icon">🎯</div>
+          <div class="card-body">
+            <div class="card-label">PR1 · 2026</div>
+            <div class="card-title">Análise de Área</div>
+            <div class="card-desc">Desempenho por questão, faixa de nota e disciplina.</div>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </a>
+
+      <a class="card" href="index.html">
+        <div class="card-inner">
+          <div class="card-icon">✍️</div>
+          <div class="card-body">
+            <div class="card-label">PR1 · 2026</div>
+            <div class="card-title">Descontos Ortográficos</div>
+            <div class="card-desc">Notas, erros ortográficos e distribuição por série e turma.</div>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </a>
+
+    </div>
+
+    <footer>
+      <span class="footer-text">Escola Móbile · Análises 2026</span>
+      <span class="footer-logo">MÓBILE</span>
+    </footer>
+
+  </div>
+
+</body>
+</html>
